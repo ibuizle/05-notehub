@@ -5,13 +5,15 @@
     "module": "ESNext",
     "skipLibCheck": true,
 
+    /* Важливо для React: */
+    "jsx": "react-jsx", // <--- Додай або виправ цей рядок
+
     /* Bundler mode */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "jsx": "react-jsx", // <-- Add this line
 
     /* Linting */
     "strict": true,
