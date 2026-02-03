@@ -1,38 +1,52 @@
-// ВИПРАВЛЕНО: Додано імпорт React
 import React, { useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import css from './Modal.module.css';
+import s from './Modal.module.css';
 
 interface ModalProps {
-  children: React.ReactNode;
+  isOpen: boolean;
   onClose: () => void;
+  children: React.ReactNode;
 }
 
-const modalRoot = document.getElementById('modal-root');
+const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children }) => {
+  
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    }
+    
+    return () => {
+      document.body.style.overflow = 'unset'; 
+    };
+  }, [isOpen]);
 
-export default function Modal({ children, onClose }: ModalProps) {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.code === 'Escape') onClose();
     };
-
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [onClose]);
 
-  if (!modalRoot) return null;
+  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
+  if (!isOpen) return null;
 
   return createPortal(
-    <div
-      className={css.backdrop}
-      role="dialog"
-      aria-modal="true"
-      onClick={onClose}
-    >
-      <div className={css.modal} onClick={(e) => e.stopPropagation()}>
+    <div className={s.backdrop} onClick={handleBackdropClick}>
+      <div className={s.modal}>
+        <button className={s.closeBtn} onClick={onClose} type="button">
+          &times;
+        </button>
         {children}
       </div>
     </div>,
-    modalRoot
+    document.body 
   );
-}
+};
+
+export default Modal;
