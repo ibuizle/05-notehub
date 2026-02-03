@@ -1,9 +1,17 @@
 import axios from 'axios';
 import { Note } from '../types/note';
 
+const token = import.meta.env.VITE_NOTEHUB_TOKEN; 
+
 const API_URL = 'https://notehub-public.goit.study/api';
 
 axios.defaults.baseURL = API_URL;
+
+if (token) {
+  axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+} else {
+  console.error('API Token not found inside .env file!');
+}
 
 interface FetchNotesResponse {
   notes: Note[];
@@ -16,11 +24,9 @@ interface FetchNotesParams {
   search?: string;
 }
 
-// 3. Тип для створення нотатки (щоб не відправити id або дату)
 export type CreateNoteParams = Pick<Note, 'title' | 'content' | 'tag'>;
 
 export const fetchNotes = async ({ page, perPage, search = '' }: FetchNotesParams): Promise<FetchNotesResponse> => {
-  // Додаємо /notes саме тут
   const { data } = await axios.get<FetchNotesResponse>('/notes', {
     params: {
       page,

@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { useDebouncedCallback } from 'use-debounce';
 import css from './App.module.css';
 
-import { fetchNotes, deleteNote } from '../../services/noteService';
+import { fetchNotes } from '../../services/noteService';
 import NoteList from '../NoteList/NoteList';
 import Pagination from '../Pagination/Pagination';
 import SearchBox from '../SearchBox/SearchBox';
@@ -16,9 +16,6 @@ export default function App() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
-
-  const queryClient = useQueryClient();
 
   const handleSearch = useDebouncedCallback((value: string) => {
     setSearch(value);
@@ -29,15 +26,6 @@ export default function App() {
     queryKey: ['notes', page, search],
     queryFn: () => fetchNotes({ page, perPage: PER_PAGE, search }),
     placeholderData: (previousData) => previousData,
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: deleteNote,
-    onMutate: (id) => setDeletingId(id),
-    onSettled: () => setDeletingId(null),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notes'] });
-    },
   });
 
   const handlePageChange = ({ selected }: { selected: number }) => {
@@ -56,19 +44,18 @@ export default function App() {
         </button>
       </header>
 
+      {/* Loading / Error states */}
       {isLoading && <p>Loading...</p>}
-      {isError && <p>Error loading notes</p>}
+      {isError && <p style={{ color: 'red' }}>Error loading notes. Check API Token.</p>}
 
+      {/* Note List */}
       {data && data.notes.length > 0 ? (
-        <NoteList
-          notes={data.notes}
-          onDelete={(id) => deleteMutation.mutate(id)}
-          isDeletingId={deletingId}
-        />
+        <NoteList notes={data.notes} />
       ) : (
-        !isLoading && <p>No notes found</p>
+        !isLoading && !isError && <p>No notes found</p>
       )}
 
+      {/* Pagination */}
       {data && data.totalPages > 1 && (
         <Pagination
           pageCount={data.totalPages}
@@ -77,8 +64,9 @@ export default function App() {
         />
       )}
 
+      {/* Modal */}
       {isModalOpen && (
-        <Modal onClose={closeModal}>
+        <Modal isOpen={isModalOpen} onClose={closeModal}>
           <NoteForm onClose={closeModal} />
         </Modal>
       )}

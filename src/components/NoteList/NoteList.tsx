@@ -17,28 +17,34 @@ const NoteList: React.FC<NoteListProps> = ({ notes }) => {
       queryClient.invalidateQueries({ queryKey: ['notes'] });
     },
     onError: (error) => {
-      console.error('Помилка при видаленні:', error);
+      console.error('Error deleting note:', error);
+      alert('Failed to delete note');
     }
   });
 
   return (
-    <ul className={s.list}> 
+    <ul className={s.list}>
       {notes.map((note) => (
-        <li key={note.id} className={s.item}>
-          <div className={s.contentWrapper}>
-             <h3 className={s.title}>{note.title}</h3>
-             <p className={s.content}>{note.content}</p>
+        <li key={note.id} className={s.listItem}>
+           {/* Заголовок */}
+           <h3 className={s.title}>{note.title}</h3>
+           
+           {/* Текст нотатки */}
+           <p className={s.content}>{note.content}</p>
+           
+           {/* Нижній блок з тегом та кнопкою */}
+           <div className={s.footer}>
              <span className={s.tag}>{note.tag}</span>
-          </div>
-
-          <button 
-            className={s.deleteBtn}
-            onClick={() => mutate(note.id)} 
-            disabled={isPending}
-            type="button"
-          >
-            {isPending ? 'Deleting...' : 'Delete'}
-          </button>
+             
+             <button 
+               className={s.button}
+               onClick={() => mutate(note.id)} 
+               disabled={isPending}
+               type="button"
+             >
+               {isPending ? '...' : 'Delete'}
+             </button>
+           </div>
         </li>
       ))}
     </ul>
