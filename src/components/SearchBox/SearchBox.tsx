@@ -1,5 +1,3 @@
-// ВИПРАВЛЕНО: Додано імпорт React
-import React from 'react';
 import css from './SearchBox.module.css';
 
 interface SearchBoxProps {
